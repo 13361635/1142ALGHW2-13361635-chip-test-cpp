@@ -14,25 +14,47 @@ public:
     ChipTester(const vector<vector<bool>>& r) : report(r) {}
 
     // 回傳一顆好晶片的索引；若無法找到則回傳 -1
-    int findGoodChip(vector<int> chips) {
-        // TODO:
-        // 反覆執行下列步驟：
-        //
-        // 1. 若 chips 中只剩一顆晶片，直接回傳它的索引
-        //
-        // 2. 令第一顆晶片為候選晶片 A
-        //
-        // 3. 設 V = 0
-        //
-        // 4. 將 A 與其餘晶片逐一互測：
-        //    若 A 說 B 是好的，且 B 說 A 是好的，則 V++
-        //
-        // 5. 若 V >= n/2，回傳 A
-        //
-        // 6. 否則刪除 A，對剩下的晶片重複測試
+     int findGoodChip(vector<int> chips) {
+    // Phase 1: 配對淘汰
+        while (chips.size() > 1) {
+            vector<int> next;
 
-        return -1; // 請修改
-    }
+            for (int i = 0; i + 1 < chips.size(); i += 2) {
+                int A = chips[i];
+                int B = chips[i + 1];
+
+                if (report[A][B] && report[B][A]) {
+                // 兩個互說好 → 留一個
+                    next.push_back(A);
+                }
+            // 否則兩個都丟掉
+            }
+
+        // 如果是奇數個，最後一個直接留下
+            if (chips.size() % 2 == 1) {
+                next.push_back(chips.back());
+            }
+
+            chips = next;
+        }
+
+        if (chips.empty()) return -1;
+
+        int candidate = chips[0];
+
+        // Phase 2: 驗證（避免全壞的極端情況）
+        int count = 0;
+        for (int i = 0; i < report.size(); i++) {
+            if (report[candidate][i]) {
+                count++;
+            }
+        }
+
+        if (count >= report.size() / 2) {
+            return candidate;
+        }
+        return -1;
+        }
 };
 
 int main() {
